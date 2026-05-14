@@ -18,10 +18,20 @@
   min-height: 0;   /* IMPORTANT FIX */
   overflow-y: auto;
 }
+
+.chat-loading{
+    text-align:center;
+    margin:auto;
+    color:white;
+    font-size:50px;
+}
 @media (max-width: 900px) {
 
   .chat-cover {
     padding: 0;
+  }
+  .chat-loading{
+     font-size:25px;
   }
 
   .chat-container {
