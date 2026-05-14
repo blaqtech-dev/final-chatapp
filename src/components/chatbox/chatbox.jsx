@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import assets from "../../assets/assets";
 import "./chatbox.css";
 import { AppContext } from "../../context/appcontext";
@@ -13,8 +13,6 @@ import { db } from "../../config/firebase";
 import { toast } from "react-toastify";
 import { uploadImage } from "../../lib/upload";
 
-
-
 export function ChatBox() {
   const {
     userData,
@@ -28,241 +26,206 @@ export function ChatBox() {
 
   const [input, setInput] = useState("");
 
+  // 🔥 voice recording
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
 
+  // 🔥 AUDIO CONTROL FIX (IMPORTANT)
+  const [activeAudioId, setActiveAudioId] = useState(null);
+  const audioRefs = useRef({});
 
-  // voice not implementation
-const [recording, setRecording] = useState(false);
-const [mediaRecorder, setMediaRecorder] = useState(null);
-const [audioChunks, setAudioChunks] = useState([]);
+  // ================= VOICE RECORDING =================
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
 
-const startRecording = async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const chunks = [];
 
-    const recorder = new MediaRecorder(stream);
-    setMediaRecorder(recorder);
+      recorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
 
-    const chunks = [];
-    setAudioChunks([]);
+      recorder.onstop = () => {
+        const audioBlob = new Blob(chunks, { type: "audio/webm" });
+        uploadVoiceNote(audioBlob);
+      };
 
-    recorder.ondataavailable = (e) => {
-      chunks.push(e.data);
-    };
+      recorder.start();
+      setRecording(true);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    recorder.onstop = () => {
-      const audioBlob = new Blob(chunks, { type: "audio/webm" });
-      uploadVoiceNote(audioBlob);
-    };
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      setRecording(false);
+    }
+  };
 
-    recorder.start();
-    setRecording(true);
-  } catch (err) {
-    console.log(err);
-  }
-};
+  // ================= UPLOAD VOICE =================
+  const uploadVoiceNote = async (audioBlob) => {
+    try {
+      const formData = new FormData();
 
-const stopRecording = () => {
-  if (mediaRecorder) {
-    mediaRecorder.stop();
-    setRecording(false);
-  }
-};
+      formData.append("file", audioBlob);
+      formData.append("upload_preset", "bolu_abiola");
 
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/drhflo9zn/video/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-const uploadVoiceNote = async (audioBlob) => {
-  try {
-    const formData = new FormData();
+      const data = await res.json();
 
-    formData.append("file", audioBlob);
-    formData.append("upload_preset", "bolu_abiola"); // same preset you use
+      await updateDoc(doc(db, "messages", messagesId), {
+        messages: arrayUnion({
+          sId: userData.id,
+          audio: data.secure_url,
+          createdAt: new Date(),
+        }),
+      });
 
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/drhflo9zn/video/upload",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+      await updateLastMessage("🎤 voice message");
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    const data = await res.json();
-
-    const audioUrl = data.secure_url;
-
-    await updateDoc(doc(db, "messages", messagesId), {
-      messages: arrayUnion({
-        sId: userData.id,
-        audio: audioUrl,
-        createdAt: new Date(),
-      }),
-    });
-
-    await updateLastMessage("🎤 voice message");
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-  // ✅ SAFE UPDATE FUNCTION (FIXES chatIndex ERROR)
+  // ================= UPDATE LAST MESSAGE =================
   const updateLastMessage = async (lastMessage) => {
     const userIds = [chatUser.rId, userData.id];
 
     for (const id of userIds) {
-      try {
-        const userChatRef = doc(db, "chats", id);
-        const snap = await getDoc(userChatRef);
+      const userChatRef = doc(db, "chats", id);
+      const snap = await getDoc(userChatRef);
 
-        if (!snap.exists()) continue;
+      if (!snap.exists()) continue;
 
-        const userChatData = snap.data();
+      const data = snap.data();
 
-        if (!userChatData?.chatsData) continue;
+      const index = data.chatsData.findIndex(
+        (c) => c.messageId === messagesId
+      );
 
-        const chatIndex = userChatData.chatsData.findIndex(
-          (c) => c.messageId === messagesId
-        );
+      if (index === -1) continue;
 
-        // 🚨 prevent crash
-        if (chatIndex === -1) {
-          console.log("Chat not found for:", messagesId);
-          continue;
-        }
+      const updated = [...data.chatsData];
 
-        const updatedChats = [...userChatData.chatsData];
+      updated[index] = {
+        ...updated[index],
+        lastMessage,
+        updatedAt: Date.now(),
+      };
 
-        updatedChats[chatIndex] = {
-          ...updatedChats[chatIndex],
-          lastMessage,
-          updatedAt: Date.now(),
-          messageSeen:
-            updatedChats[chatIndex].rId === userData.id
-              ? false
-              : updatedChats[chatIndex].messageSeen,
-        };
-
-        await updateDoc(userChatRef, {
-          chatsData: updatedChats,
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
-
-  // ✅ SEND TEXT MESSAGE
-  const sendMessage = async () => {
-    try {
-      if (!input || !messagesId) return;
-
-      await updateDoc(doc(db, "messages", messagesId), {
-        messages: arrayUnion({
-          sId: userData.id,
-          text: input,
-          createdAt: new Date(),
-        }),
+      await updateDoc(userChatRef, {
+        chatsData: updated,
       });
-
-      await updateLastMessage(input.slice(0, 25));
-
-      setInput("");
-    } catch (error) {
-      toast.error(error.message);
     }
   };
 
-  // ✅ SEND IMAGE MESSAGE
+  // ================= SEND TEXT =================
+  const sendMessage = async () => {
+    if (!input || !messagesId) return;
+
+    await updateDoc(doc(db, "messages", messagesId), {
+      messages: arrayUnion({
+        sId: userData.id,
+        text: input,
+        createdAt: new Date(),
+      }),
+    });
+
+    await updateLastMessage(input.slice(0, 25));
+    setInput("");
+  };
+
+  // ================= SEND IMAGE =================
   const sendImage = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    try {
-      const fileUrl = await uploadImage(file);
+    const fileUrl = await uploadImage(file);
 
-      if (!fileUrl || !messagesId) return;
+    await updateDoc(doc(db, "messages", messagesId), {
+      messages: arrayUnion({
+        sId: userData.id,
+        image: fileUrl,
+        createdAt: new Date(),
+      }),
+    });
 
-      await updateDoc(doc(db, "messages", messagesId), {
-        messages: arrayUnion({
-          sId: userData.id,
-          image: fileUrl,
-          createdAt: new Date(),
-        }),
-      });
-
-      await updateLastMessage("sent a photo");
-    } catch (error) {
-      toast.error(error.message);
-    }
+    await updateLastMessage("sent a photo");
   };
 
-  // ✅ FORMAT TIME
+  // ================= TIME FORMAT =================
   const covertTime = (timeStamp) => {
-    let date = timeStamp.toDate();
+    const date = timeStamp.toDate();
     let hours = date.getHours();
     let minutes = date.getMinutes();
 
     minutes = minutes < 10 ? "0" + minutes : minutes;
 
-    if (hours > 12) {
-      return hours - 12 + ":" + minutes + " PM";
-    } else {
-      return hours + ":" + minutes + " AM";
-    }
+    return hours > 12
+      ? hours - 12 + ":" + minutes + " PM"
+      : hours + ":" + minutes + " AM";
   };
 
-  // ✅ REAL-TIME MESSAGES
+  // ================= REALTIME MESSAGES =================
   useEffect(() => {
     if (!messagesId) return;
 
-    const unSub = onSnapshot(doc(db, "messages", messagesId), (res) => {
+    const unsub = onSnapshot(doc(db, "messages", messagesId), (res) => {
       const data = res.data();
+      if (!data?.messages) return setMessages([]);
 
-      if (!data?.messages) {
-        setMessages([]);
-        return;
-      }
-
-      const reversed = [...data.messages].reverse();
-      setMessages(reversed);
+      setMessages([...data.messages].reverse());
     });
 
-    return () => unSub();
+    return () => unsub();
   }, [messagesId]);
 
+  // ================= AUDIO CONTROL =================
+  const handleAudioPlay = (index) => {
+    const currentAudio = audioRefs.current[index];
 
- 
+    // pause previous
+    if (activeAudioId !== null && activeAudioId !== index) {
+      const prev = audioRefs.current[activeAudioId];
+      if (prev) prev.pause();
+    }
 
+    // toggle same audio
+    if (activeAudioId === index) {
+      currentAudio.pause();
+      setActiveAudioId(null);
+      return;
+    }
 
+    currentAudio.play();
+    setActiveAudioId(index);
+  };
 
-
-
+  // ================= UI =================
   return chatUser ? (
-  <div className={`chat-box ${chatVisible ? "" : "chat-hidden"}`}>
+    <div className={`chat-box ${chatVisible ? "" : "chat-hidden"}`}>
       {/* HEADER */}
       <div className="chat-user">
         <img src={chatUser.userData.avatar} />
-        <p>
-          {chatUser.userData.name}
-          {Date.now()-chatUser.userData.lastSeen<=70000?<img src={assets.green_dot} className='dot'/>:null}
-        </p>
-        <img src={assets.help_icon} className="help" />
+        <p>{chatUser.userData.name}</p>
 
-        <img onClick={()=>setChatVisible(false)} className="arrow"   src={assets.arrow_icon}/>
-    
-    
-  
-      
-     
-
+        <img
+          onClick={() => setChatVisible(false)}
+          className="arrow"
+          src={assets.arrow_icon}
+        />
       </div>
 
       {/* MESSAGES */}
@@ -270,21 +233,30 @@ const uploadVoiceNote = async (audioBlob) => {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={
-              msg.sId === userData.id ? "s-message" : "r-message"
-            }
+            className={msg.sId === userData.id ? "s-message" : "r-message"}
           >
+            {/* TEXT / IMAGE / AUDIO */}
+            {msg.audio ? (
+              <div className="voice-note">
+                <button
+                  className="play-btn"
+                  onClick={() => handleAudioPlay(index)}
+                >
+                  {activeAudioId === index ? "❚❚" : "▶"}
+                </button>
 
-   {msg.audio ? (
-  <div className="voice-note">
-<audio controls src={msg.audio}></audio>
-  </div>
-) : msg.image ? (
-  <img className="chat-image" src={msg.image}/>
-) : (
-  <p className="msg">{msg.text}</p>
-)}
+                <audio
+                  ref={(el) => (audioRefs.current[index] = el)}
+                  src={msg.audio}
+                />
+              </div>
+            ) : msg.image ? (
+              <img className="chat-image" src={msg.image} />
+            ) : (
+              <p className="msg">{msg.text}</p>
+            )}
 
+            {/* META */}
             <div className="content-chat">
               <img
                 src={
@@ -302,41 +274,36 @@ const uploadVoiceNote = async (audioBlob) => {
       {/* INPUT */}
       <div className="chat-input">
         <input
-          type="text"
-          onChange={(e) => setInput(e.target.value)}
           value={input}
-          placeholder="send a message"
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        />
-
-        <input
-          type="file"
-          onChange={sendImage}
-          id="image"
-          accept="image/png, image/jpeg"
-          hidden
+          placeholder="send a message"
         />
 
         <label htmlFor="image">
           <img src={assets.gallery_icon} />
         </label>
 
-
-
+        <input
+          id="image"
+          type="file"
+          hidden
+          onChange={sendImage}
+          accept="image/*"
+        />
 
         <img src={assets.send_button} onClick={sendMessage} />
-        <button
-  onClick={recording ? stopRecording : startRecording}
-  style={{ background: "none", border: "none" }}
-  className='voicenote'
->
-  {recording ? "⏹" : "🎤"}
-</button>
 
+        <button
+          onClick={recording ? stopRecording : startRecording}
+          className="voicenote"
+        >
+          {recording ? "⏹" : "🎤"}
+        </button>
       </div>
     </div>
   ) : (
-<div className={`chat-welcome ${chatVisible ? "" : "hidden"}`}>
+    <div className="chat-welcome">
       <img src={assets.logo_icon} />
       <p>chat anytime</p>
     </div>
