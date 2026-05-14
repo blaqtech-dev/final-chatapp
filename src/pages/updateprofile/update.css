@@ -1,0 +1,151 @@
+.profile {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #596AFF, #383699);
+}
+
+/* MAIN CARD */
+.profile-container {
+  width: 100%;
+  max-width: 900px;
+  background: white;
+  display: flex;
+  gap: 40px;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  align-items: center;
+
+  box-sizing: border-box;
+  overflow: hidden; /* prevents overflow bleed */
+}
+/* LEFT SIDE (FORM) */
+.profile form {
+  flex: 1;
+  min-width: 0; /* 🔥 CRITICAL FIX */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.profile-container h3 {
+  font-size: 24px;
+  text-transform: capitalize;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+/* INPUTS */
+.profile-container input,
+.profile-container textarea {
+  width: 100%;
+  max-width: 100%;  /* prevents overflow */
+  box-sizing: border-box;
+
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+}
+.profile-container input:focus,
+.profile-container textarea:focus {
+  border-color: #596AFF;
+  box-shadow: 0 0 0 3px rgba(89, 106, 255, 0.15);
+}
+
+/* TEXTAREA */
+.profile-container textarea {
+  height: 120px;
+  resize: none;
+}
+
+/* UPLOAD SECTION */
+.profile-container label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.profile-container label img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
+/* UPLOAD BUTTON */
+.upload-span {
+  background: #596AFF;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.upload-span:hover {
+  background: #3f50e0;
+}
+
+/* SAVE BUTTON */
+.profile form button {
+    width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: none;
+  background: #596AFF;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+
+.profile form button:hover {
+  background: #3f50e0;
+}
+
+.profile form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* RIGHT SIDE PREVIEW */
+.profile-img {
+  width: 280px;
+  height: 280px;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 4px solid #f2f2f2;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 900px) {
+  .profile-container {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .profile form {
+     width: 100%;
+  }
+
+  .profile-img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+  }
+
+  .profile-container h3 {
+    font-size: 20px;
+  }
+}
