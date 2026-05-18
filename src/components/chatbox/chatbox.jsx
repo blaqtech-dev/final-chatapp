@@ -235,7 +235,7 @@ export function ChatBox() {
             key={index}
             className={msg.sId === userData.id ? "s-message" : "r-message"}
           >
-            {/* TEXT / IMAGE / AUDIO */}
+        
             {msg.audio ? (
               <div className="voice-note">
                 <button
@@ -256,7 +256,7 @@ export function ChatBox() {
               <p className="msg">{msg.text}</p>
             )}
 
-            {/* META */}
+           
             <div className="content-chat">
               <img
                 src={
@@ -271,7 +271,7 @@ export function ChatBox() {
         ))}
       </div>
 
-      {/* INPUT */}
+     
       <div className="chat-input">
         <input
           value={input}
