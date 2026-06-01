@@ -7,8 +7,11 @@ import {
   doc,
   getDoc,
   onSnapshot,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
+
+
 import { db } from "../../config/firebase";
 import { toast } from "react-toastify";
 import { uploadImage } from "../../lib/upload";
@@ -85,14 +88,17 @@ export function ChatBox() {
 
       const data = await res.json();
 
-      await updateDoc(doc(db, "messages", messagesId), {
-        messages: arrayUnion({
-          sId: userData.id,
-          audio: data.secure_url,
-          createdAt: new Date(),
-        }),
-      });
-
+      await setDoc(
+  doc(db, "messages", messagesId),
+  {
+    messages: arrayUnion({
+      sId: userData.id,
+      audio: data.secure_url,
+      createdAt: new Date(),
+    }),
+  },
+  { merge: true }
+);
       await updateLastMessage("🎤 voice message");
     } catch (err) {
       console.log(err);
@@ -133,20 +139,25 @@ export function ChatBox() {
 
   // ================= SEND TEXT =================
   const sendMessage = async () => {
-    if (!input || !messagesId) return;
+  if (!input || !messagesId) return;
 
-    await updateDoc(doc(db, "messages", messagesId), {
+  const msgRef = doc(db, "messages", messagesId);
+
+  await setDoc(
+    msgRef,
+    {
       messages: arrayUnion({
         sId: userData.id,
         text: input,
         createdAt: new Date(),
       }),
-    });
+    },
+    { merge: true }
+  );
 
-    await updateLastMessage(input.slice(0, 25));
-    setInput("");
-  };
-
+  await updateLastMessage(input.slice(0, 25));
+  setInput("");
+};
   // ================= SEND IMAGE =================
   const sendImage = async (e) => {
     const file = e.target.files[0];
@@ -154,13 +165,17 @@ export function ChatBox() {
 
     const fileUrl = await uploadImage(file);
 
-    await updateDoc(doc(db, "messages", messagesId), {
-      messages: arrayUnion({
-        sId: userData.id,
-        image: fileUrl,
-        createdAt: new Date(),
-      }),
-    });
+   await setDoc(
+  doc(db, "messages", messagesId),
+  {
+    messages: arrayUnion({
+      sId: userData.id,
+      image: fileUrl,
+      createdAt: new Date(),
+    }),
+  },
+  { merge: true }
+);
 
     await updateLastMessage("sent a photo");
   };

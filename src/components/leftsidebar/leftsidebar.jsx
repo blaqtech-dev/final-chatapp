@@ -100,13 +100,20 @@ export function LeftSidebar() {
           messageSeen: true,
         };
 
-        await updateDoc(doc(db, "chats", userData.id), {
-          chatsData: arrayUnion(chatObjectForUser),
-        });
-
-        await updateDoc(doc(db, "chats", user.id), {
-          chatsData: arrayUnion(chatObjectForReceiver),
-        });
+      await setDoc(
+  doc(db, "chats", userData.id),
+  {
+    chatsData: arrayUnion(chatObjectForUser),
+  },
+  { merge: true }
+);
+await setDoc(
+  doc(db, "chats", user.id),
+  {
+    chatsData: arrayUnion(chatObjectForReceiver),
+  },
+  { merge: true }
+);
       }
 
       // 🔥 OPEN CHAT IMMEDIATELY
@@ -144,10 +151,13 @@ export function LeftSidebar() {
 
       const userChatsData = userChatSnapshot.data();
 
-      const chatIndex = userChatsData.chatsData.findIndex(
-        (c) => c.messageId === item.messageId
-      );
+    
 
+const chatsArray = userChatsData?.chatsData || [];
+
+const chatIndex = chatsArray.findIndex(
+  (c) => c.messageId === item.messageId
+);
       if (chatIndex === -1) return;
 
       const updatedChats = [...userChatsData.chatsData];
@@ -183,6 +193,8 @@ export function LeftSidebar() {
               <p onClick={() => navigate("/profile")}>edit profile</p>
               <hr />
               <p onClick={() => logOut()}>logout</p>
+              <hr/>
+              <p onClick={()=>navigate('/dashboard')}>dashboard</p>
             </div>
           </div>
         </div>

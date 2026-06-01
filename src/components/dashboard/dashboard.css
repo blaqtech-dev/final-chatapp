@@ -1,0 +1,327 @@
+.dashboard {
+  min-height: 100vh;
+
+  display: flex;
+
+  background: #f5f7fb;
+
+  font-family: Arial, sans-serif;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+  width: 240px;
+
+  background: #ffffff;
+
+  border-right: 1px solid #e5e7eb;
+
+  padding: 25px 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 15px;
+
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar button {
+  border: none;
+
+  padding: 7px;
+
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  background: #f3f4f6;
+
+  transition: 0.25s ease;
+
+  text-align: left;
+}
+
+.sidebar button:hover {
+  background: #2563eb;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* ================= MAIN CONTENT ================= */
+
+.dashboard-content {
+  flex: 1;
+
+  max-width: 900px;
+
+  margin: 0 auto;
+
+  padding: 25px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+
+  box-sizing: border-box;
+}
+
+/* ================= WELCOME CARD ================= */
+
+.welcome-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  background: #ffffff;
+
+  padding: 20px;
+
+  border-radius: 16px;
+
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.welcome-avatar {
+  width: 70px;
+  height: 70px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border: 3px solid #e5e7eb;
+}
+
+.welcome-card h2 {
+  margin: 0;
+
+  font-size: 20px;
+
+  color: #111827;
+}
+
+.welcome-card p {
+  margin: 5px 0 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+/* ================= CREATE POST ================= */
+
+.create-post {
+  background: #ffffff;
+
+  padding: 20px;
+
+  border-radius: 16px;
+
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* (IMPORTANT FIX FOR TEXTAREA OVERFLOW) */
+.create-post textarea {
+  width: 100%;
+
+  min-height: 120px;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  border: 1px solid #d1d5db;
+
+  outline: none;
+
+  resize: none;
+
+  box-sizing: border-box;
+}
+
+.create-post textarea:focus {
+  border-color: #2563eb;
+}
+
+/* ================= STATS ================= */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 15px;
+}
+
+.stat-card {
+  background: #ffffff;
+
+  padding: 20px;
+
+  border-radius: 14px;
+
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+
+  text-align: center;
+
+  transition: 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.stat-card h3 {
+  margin: 0;
+
+  font-size: 14px;
+
+  color: #6b7280;
+}
+
+.stat-card span {
+  display: block;
+
+  margin-top: 8px;
+
+  font-size: 22px;
+
+  font-weight: bold;
+
+  color: #111827;
+}
+
+/* ================= ACTIVITY ================= */
+
+.activity-card {
+  background: #ffffff;
+
+  padding: 20px;
+
+  border-radius: 16px;
+
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.activity-card h3 {
+  margin-top: 0;
+}
+
+.activity-card p {
+  color: #6b7280;
+}
+
+.my-posts {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f8f9ff;
+  border-radius: 12px;
+}
+
+.my-posts h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* EACH POST CARD */
+.my-post-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease;
+}
+
+.my-post-card:hover {
+  transform: translateY(-2px);
+}
+
+/* TEXT */
+.my-post-card p {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* IMAGE */
+.my-post-img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* DELETE BUTTON */
+.my-post-card button {
+  align-self: flex-end;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #ff4d4d;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.my-post-card button:hover {
+  background: #e60000;
+}
+
+/* EMPTY STATE (optional if no posts) */
+.my-posts p.empty {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+   
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 91%;
+
+    height: auto;
+
+    flex-direction: row;
+
+    justify-content: space-around;
+margin-right:60px;
+    position: relative;
+  }
+
+  .sidebar button {
+    flex: 1;
+font-size:14px;
+    text-align: center;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

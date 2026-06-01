@@ -33,11 +33,7 @@ const AppContextProvider = (props) => {
         ...data,
       });
 
-      if (data.avatar && data.name) {
-        navigate("/chat");
-      } else {
-        navigate("/profile");
-      }
+  
 
       await updateDoc(userRef, {
         lastSeen: Date.now(),

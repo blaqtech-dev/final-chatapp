@@ -10,6 +10,9 @@ import { useContext, useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './config/firebase'
 import { AppContext } from './context/appcontext'
+import { CreatePost } from './components/createpost/createpost'
+import { Dashboard } from './components/dashboard/dashboard'
+import { Home } from './components/homepage/homepage'
 
 
 
@@ -19,16 +22,15 @@ function App() {
     const {loadUserData}=useContext(AppContext)
 
     useEffect(()=>{
-onAuthStateChanged(auth,async(user)=>{
-if(user){
-navigate('/chat')
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    await loadUserData(user.uid);
 
-await loadUserData(user.uid)
-}
-else{
-navigate('/')
-}
-})
+    navigate("/dashboard");
+  } else {
+    navigate("/");
+  }
+});
     },[])
 
 return(
@@ -37,6 +39,12 @@ return(
     <Routes>
         <Route path='/' element={<LoginIn/>}></Route>
          <Route path='/chat' element={<Chat/>}></Route>
+          <Route path='/dashboard' element={<Dashboard/>}></Route>
+            <Route path='/create' element={<CreatePost/>}></Route>
+             <Route
+    path="/home"
+    element={<Home />}
+  />
           <Route path='/profile' element={<UpdateProfile/>}></Route>
     </Routes>
 </div>

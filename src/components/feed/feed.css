@@ -1,0 +1,48 @@
+.feed {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+
+  margin-top: 20px;
+}
+
+.feed:empty {
+  display: none;
+}
+
+/* LOADING / EMPTY STATE */
+
+.feed-empty {
+  background: #ffffff;
+
+  padding: 40px 20px;
+
+  border-radius: 16px;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.feed-empty h3 {
+  margin: 0 0 10px;
+  color: #111827;
+}
+
+.feed-empty p {
+  margin: 0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+  .feed {
+    gap: 15px;
+    margin-top: 15px;
+  }
+}
