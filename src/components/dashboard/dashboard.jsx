@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../../context/appcontext";
-import { CreatePost } from "../../components/createpost/CreatePost";
+import { CreatePost } from "../createpost/createpost";
 
 import {
   collection,

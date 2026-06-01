@@ -16,7 +16,7 @@ import { db } from "../../config/firebase";
 import { AppContext } from "../../context/appcontext";
 
 import './feed.css'
-import { PostCard } from "../postcard/postcard.jsx";
+import { PostCard } from "../postcard/postcard";
 
 
 export function Feed() {
