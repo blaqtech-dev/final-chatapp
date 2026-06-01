@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../../context/appcontext";
-import { Feed } from "../../components/feed/Feed";
+import {Feed} from '../feed/feed'
 
 import "./home.css";
 
