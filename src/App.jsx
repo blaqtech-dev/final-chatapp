@@ -21,21 +21,24 @@ function App() {
 
     const {loadUserData}=useContext(AppContext)
 
-    useEffect(()=>{
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    await loadUserData(user.uid);
 
-    navigate("/dashboard");
-  } else {
-    navigate("/");
-  }
-});
-    },[])
+useEffect(() => {
+  const unsub = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      await loadUserData(user.uid);
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  });
+
+  return () => unsub();
+}, []);
 
 return(
 <div>
     <ToastContainer/>
+   
     <Routes>
         <Route path='/' element={<LoginIn/>}></Route>
          <Route path='/chat' element={<Chat/>}></Route>
